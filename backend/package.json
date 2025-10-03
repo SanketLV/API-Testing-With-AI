@@ -12,6 +12,7 @@
   "license": "ISC",
   "packageManager": "pnpm@10.17.1",
   "dependencies": {
+    "@cerebras/cerebras_cloud_sdk": "^1.50.0",
     "axios": "^1.12.2",
     "cors": "^2.8.5",
     "dockerode": "^4.0.9",
