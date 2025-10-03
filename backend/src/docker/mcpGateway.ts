@@ -36,17 +36,15 @@ export class MCPGateway {
     this.activeContainers = new Map();
     this.defaultImage = process.env.DOCKER_TEST_IMAGE || "node:18-alpine";
     this.memoryLimit =
-      parseInt(process.env.DOCKER_MEMORY_LIMIT || "512") * 1024 * 1024; // MB to bytes
+      parseInt(process.env.DOCKER_MEMORY_LIMIT || "512") * 1024 * 1024; //* MB to bytes
 
     console.log("🐳 Docker MCP Gateway initialized");
     console.log(`   - Default image: ${this.defaultImage}`);
     console.log(`   - Memory limit: ${this.memoryLimit / 1024 / 1024}MB`);
   }
 
-  /**
-   * Create isolated test environment in Docker container
-   * This is the creative Docker use - each test suite gets fresh container!
-   */
+  //* Create isolated test environment in Docker container
+  //* This is the creative Docker use - each test suite gets fresh container!
   async createTestEnvironment(
     apiSpec: APISpecification,
     config?: Partial<ContainerConfig>
@@ -67,10 +65,10 @@ export class MCPGateway {
         ],
         HostConfig: {
           Memory: config?.memory || this.memoryLimit,
-          AutoRemove: true, // Auto-cleanup on stop
+          AutoRemove: true, //* Auto-cleanup on stop
           NetworkMode: "bridge",
         },
-        // Keep container alive for test execution
+        //* Keep container alive for test execution
         Cmd: ["sh", "-c", "tail -f /dev/null"],
         AttachStdin: false,
         AttachStdout: true,
@@ -79,14 +77,14 @@ export class MCPGateway {
         OpenStdin: false,
       };
 
-      // Create container
+      //* Create container
       const container = await this.docker.createContainer(containerConfig);
       const containerId = container.id;
 
-      // Start container
+      //* Start container
       await container.start();
 
-      // Store active container
+      //* Store active container
       this.activeContainers.set(containerId, container);
 
       console.log(
@@ -99,7 +97,7 @@ export class MCPGateway {
     } catch (error: any) {
       console.error("❌ Failed to create Docker container:", error.message);
 
-      // Fallback: Return mock container ID if Docker not available
+      //* Fallback: Return mock container ID if Docker not available
       if (
         error.message.includes("connect ENOENT") ||
         error.message.includes("ECONNREFUSED")
@@ -113,15 +111,13 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Execute command inside container
-   */
+  //* Execute command inside container
   async executeInContainer(
     containerId: string,
     command: string[]
   ): Promise<string> {
     try {
-      // Check if mock container
+      //* Check if mock container
       if (containerId.startsWith("mock-")) {
         console.log("⚠️  Mock container - skipping execution");
         return "Mock execution result";
@@ -168,9 +164,7 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Get container logs
-   */
+  //* Get container logs
   async getLogs(containerId: string): Promise<string> {
     try {
       if (containerId.startsWith("mock-")) {
@@ -195,9 +189,7 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Get container stats (CPU, memory usage)
-   */
+  //* Get container stats (CPU, memory usage)
   async getStats(containerId: string): Promise<any> {
     try {
       if (containerId.startsWith("mock-")) {
@@ -226,9 +218,7 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Stop and remove container
-   */
+  //* Stop and remove container
   async cleanup(containerId: string): Promise<void> {
     try {
       if (containerId.startsWith("mock-")) {
@@ -248,17 +238,17 @@ export class MCPGateway {
         return;
       }
 
-      // Stop container
+      //* Stop container
       try {
-        await container.stop({ t: 5 }); // 5 second timeout
+        await container.stop({ t: 5 }); //* 5 second timeout
       } catch (error: any) {
-        // Container might already be stopped
+        //* Container might already be stopped
         if (!error.message.includes("is not running")) {
           console.warn("⚠️  Error stopping container:", error.message);
         }
       }
 
-      // Remove from active containers
+      //* Remove from active containers
       this.activeContainers.delete(containerId);
 
       console.log(`✅ Container ${containerId.substring(0, 12)} cleaned up`);
@@ -267,9 +257,7 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Cleanup all active containers
-   */
+  //* Cleanup all active containers
   async cleanupAll(): Promise<void> {
     console.log(
       `🧹 Cleaning up all active containers (${this.activeContainers.size})...`
@@ -284,16 +272,12 @@ export class MCPGateway {
     console.log("✅ All containers cleaned up");
   }
 
-  /**
-   * List all active test containers
-   */
+  //* List all active test containers
   getActiveContainers(): string[] {
     return Array.from(this.activeContainers.keys());
   }
 
-  /**
-   * Get container info
-   */
+  //* Get container info
   async getContainerInfo(containerId: string): Promise<DockerContainer | null> {
     try {
       if (containerId.startsWith("mock-")) {
@@ -322,9 +306,7 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Check if Docker is available
-   */
+  //* Check if Docker is available
   async isDockerAvailable(): Promise<boolean> {
     try {
       await this.docker.ping();
@@ -335,9 +317,7 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Get Docker version info
-   */
+  //* Get Docker version info
   async getDockerVersion(): Promise<any> {
     try {
       return await this.docker.version();
@@ -346,9 +326,7 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Pull Docker image if not exists
-   */
+  //* Pull Docker image if not exists
   async pullImage(imageName: string): Promise<void> {
     try {
       console.log(`🐳 Pulling Docker image: ${imageName}...`);
@@ -371,9 +349,7 @@ export class MCPGateway {
     }
   }
 
-  /**
-   * Calculate CPU percentage from stats
-   */
+  //* Calculate CPU percentage from stats
   private calculateCPUPercentage(stats: any): number {
     const cpuDelta =
       stats.cpu_stats.cpu_usage.total_usage -
@@ -389,9 +365,7 @@ export class MCPGateway {
     return 0;
   }
 
-  /**
-   * Create multiple containers for parallel testing
-   */
+  //* Create multiple containers for parallel testing
   async createMultipleEnvironments(
     apiSpec: APISpecification,
     count: number

@@ -1,5 +1,6 @@
 import { WebSocketServer, WebSocket } from "ws";
 import { MCPGateway } from "../docker/mcpGateway.js";
+import { TestExecutor } from "../services/testExecutor.js";
 import type {
   WSMessage,
   TestCase,
@@ -14,24 +15,6 @@ interface Client {
   ws: WebSocket;
   id: string;
   isAlive: boolean;
-}
-
-//* Mock TestExecutor class - this should be implemented separately
-class TestExecutor {
-  async runTest(test: TestCase, containerId: string): Promise<TestResult> {
-    //* This is a placeholder implementation
-    //* In a real implementation, this would execute the test in the container
-    return {
-      testId: test.id,
-      testName: test.name,
-      passed: true,
-      status: 200,
-      duration: 100,
-      timestamp: Date.now(),
-      containerId,
-      endpoint: test.endpoint,
-    };
-  }
 }
 
 const clients: Map<string, Client> = new Map();
